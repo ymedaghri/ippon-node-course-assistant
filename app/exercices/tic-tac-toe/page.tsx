@@ -124,7 +124,7 @@ export default function TicTacToeExercice() {
       )}
       <Card className="hidden w-[450px] lg:hidden xl:block">
         <CardHeader>
-          <CardTitle>Exercice Tic Tac Toe (C est selim qui est responsable)</CardTitle>
+          <CardTitle>Exercice Tic Tac Toe</CardTitle>
           <CardDescription>Formation NodeJS</CardDescription>
         </CardHeader>
         <CardContent>
