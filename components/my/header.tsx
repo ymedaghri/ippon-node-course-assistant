@@ -22,9 +22,9 @@ const components: { title: string; href: string; description: string }[] = [
       "Le jeu de Tic Tac Toe entre un front NextsJS et un Back Express en TDD.",
   },
   {
-    title: "A Venir",
-    href: "/exercices/avenir",
-    description: "A venir ...",
+    title: "Kanban",
+    href: "/exercices/kanban",
+    description: "Outil de gestion visuel pour le suivi d'un projet / des tâches à réaliser par une équipe",
   },
 ]
 
