@@ -235,9 +235,10 @@ export default function TicTacToeExercice() {
                     <td
                       onClick={() => markAsPlayer(rowIndex * 3 + colIndex)}
                       key={colIndex}
-                      className={`h-32 w-32 rounded-lg bg-blue-500 p-2 text-center text-8xl text-white ${winningCells.includes(rowIndex * 3 + colIndex) &&
+                      className={`h-32 w-32 rounded-lg bg-blue-500 p-2 text-center text-8xl text-white ${
+                        winningCells.includes(rowIndex * 3 + colIndex) &&
                         "bg-orange-400"
-                        }`}
+                      }`}
                     >
                       {board && displayCell(board[rowIndex * 3 + colIndex])}
                     </td>
@@ -308,7 +309,8 @@ export default function TicTacToeExercice() {
           <div className="rounded-md bg-gray-200 px-4 py-1">
             <p>GET /get-computer-mark</p>
             <p className="text-xs">
-              Laisse l&apos;ordinateur marquer la cellule la plus appropriée avec 2, puis renvoie le board json contenant cette modification
+              Laisse l&apos;ordinateur marquer la cellule la plus appropriée
+              avec 2, puis renvoie le board json contenant cette modification
             </p>
           </div>
         </CardContent>

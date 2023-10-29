@@ -24,7 +24,8 @@ const components: { title: string; href: string; description: string }[] = [
   {
     title: "Kanban",
     href: "/exercices/kanban",
-    description: "Outil de gestion visuel pour le suivi d'un projet / des tâches à réaliser par une équipe",
+    description:
+      "Outil de gestion visuel pour le suivi d'un projet / des tâches à réaliser par une équipe",
   },
 ]
 
