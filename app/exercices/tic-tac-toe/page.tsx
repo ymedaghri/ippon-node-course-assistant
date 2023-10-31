@@ -236,9 +236,10 @@ export default function TicTacToeExercice() {
                       data-selector={`board.row(${rowIndex}).col(${colIndex})`}
                       onClick={() => markAsPlayer(rowIndex * 3 + colIndex)}
                       key={colIndex}
-                      className={`h-32 w-32 rounded-lg bg-blue-500 p-2 text-center text-8xl text-white ${winningCells.includes(rowIndex * 3 + colIndex) &&
+                      className={`h-32 w-32 rounded-lg bg-blue-500 p-2 text-center text-8xl text-white ${
+                        winningCells.includes(rowIndex * 3 + colIndex) &&
                         "bg-orange-400"
-                        }`}
+                      }`}
                     >
                       {board && displayCell(board[rowIndex * 3 + colIndex])}
                     </td>
