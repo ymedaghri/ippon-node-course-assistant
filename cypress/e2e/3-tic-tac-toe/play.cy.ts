@@ -19,10 +19,10 @@ const stubPostNewGame = () =>
     board: [0, 0, 0, 0, 0, 0, 0, 0, 0],
   })
 
-const stubGetComputerMark = (board) =>
+const stubGetComputerMark = (board: number[]) =>
   cy.intercept("http://localhost:3000/get-computer-mark", { board })
 
-const stubPutMarkPlayer = (cellNumber, board) =>
+const stubPutMarkPlayer = (cellNumber: number, board: number[]) =>
   cy.intercept("http://localhost:3000/mark-player/" + cellNumber, { board })
 
 describe("example to-do app", () => {
