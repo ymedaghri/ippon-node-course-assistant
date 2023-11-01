@@ -250,13 +250,12 @@ export default function TicTacToeExercice() {
                       data-selector={`board.row(${rowIndex}).col(${colIndex})`}
                       onClick={() => markAsPlayer(rowIndex * 3 + colIndex)}
                       key={colIndex}
-                      className={`h-32 w-32 rounded-lg  p-2 text-center text-8xl text-white ${
-                        winningCells.includes(rowIndex * 3 + colIndex)
+                      className={`h-32 w-32 rounded-lg  p-2 text-center text-8xl text-white ${winningCells.includes(rowIndex * 3 + colIndex)
                           ? "bg-orange-400"
                           : invincible
-                          ? "bg-red-500"
-                          : "bg-blue-500"
-                      }
+                            ? "bg-red-500"
+                            : "bg-blue-500"
+                        }
                         }`}
                     >
                       {board && displayCell(board[rowIndex * 3 + colIndex])}
@@ -276,8 +275,8 @@ export default function TicTacToeExercice() {
                     {winner === 1
                       ? "You won !"
                       : winner === 2
-                      ? "Computer has won"
-                      : "Nobody won, so boring !"}
+                        ? "Computer has won"
+                        : "Nobody won, so boring !"}
                   </p>
                 </>
               )}
@@ -337,6 +336,11 @@ export default function TicTacToeExercice() {
               avec 2, puis renvoie le board json contenant cette modification
             </p>
           </div>
+          <p>
+            Vous devez avoir installé <i className="font-semibold">cors</i>
+            <br/>
+            <div className="inline-block bg-gray-700 text-white font-bold rounded-sm">&nbsp;<i className="font-semibold">{">"}</i> npm install cors&nbsp;</div>
+          </p>
         </CardContent>
       </Card>
     </main>
