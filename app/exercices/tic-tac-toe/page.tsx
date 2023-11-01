@@ -17,6 +17,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useEffect, useState } from "react"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 const backendUrl = "http://localhost:3000"
 const PLAYER_MARK = 1
@@ -25,6 +27,7 @@ const COMPUTER_MARK = 2
 export default function TicTacToeExercice() {
   const [board, setBoard] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0])
   const [gameEnded, setGameEnded] = useState(false)
+  const [invincible, setInvincible] = useState(false)
   const [currentPlayer, setCurrentPlayer] = useState(COMPUTER_MARK)
   const [error, setError] = useState<string | null>(null)
   const [pageJustLoaded, setPageJustLoaded] = useState(true)
@@ -33,7 +36,10 @@ export default function TicTacToeExercice() {
 
   async function createANewGame() {
     try {
-      const apiBoard = await fetchApi(`${backendUrl}/new-game`, "POST")
+      const apiBoard = await fetchApi(
+        `${backendUrl}/new-game${invincible ? "?invincible=true" : ""}`,
+        "POST",
+      )
       setBoard(apiBoard)
       setPageJustLoaded(false)
       setGameEnded(false)
@@ -48,13 +54,13 @@ export default function TicTacToeExercice() {
 
   useEffect(() => {
     if (!pageJustLoaded) {
-      if (board!.every((value) => value !== 0)) {
+      const winningCells = getWinningCells(board, currentPlayer)
+      if (winningCells.length === 3) {
+        setWinner(currentPlayer)
+        setWinningCells(winningCells)
         setGameEnded(true)
       } else {
-        const winningCells = getWinningCells(board, currentPlayer)
-        if (winningCells.length === 3) {
-          setWinner(currentPlayer)
-          setWinningCells(winningCells)
+        if (board!.every((value) => value !== 0)) {
           setGameEnded(true)
         } else {
           setCurrentPlayer(
@@ -227,6 +233,14 @@ export default function TicTacToeExercice() {
           <CardDescription>Que le meilleur gagne !</CardDescription>
         </CardHeader>
         <CardContent className="flex h-full flex-col justify-start space-y-5">
+          <div className="flex items-center justify-end space-x-2">
+            <Switch
+              id="invincible-mode"
+              onCheckedChange={setInvincible}
+              disabled={!pageJustLoaded && !gameEnded}
+            />
+            <Label htmlFor="invincible-mode">Invincible Computer Mode</Label>
+          </div>
           <table className="border-collapse">
             <tbody className="divide-y-[2px]">
               {Array.from({ length: 3 }).map((_, rowIndex) => (
@@ -236,10 +250,14 @@ export default function TicTacToeExercice() {
                       data-selector={`board.row(${rowIndex}).col(${colIndex})`}
                       onClick={() => markAsPlayer(rowIndex * 3 + colIndex)}
                       key={colIndex}
-                      className={`h-32 w-32 rounded-lg bg-blue-500 p-2 text-center text-8xl text-white ${
-                        winningCells.includes(rowIndex * 3 + colIndex) &&
-                        "bg-orange-400"
-                      }`}
+                      className={`h-32 w-32 rounded-lg  p-2 text-center text-8xl text-white ${
+                        winningCells.includes(rowIndex * 3 + colIndex)
+                          ? "bg-orange-400"
+                          : invincible
+                          ? "bg-red-500"
+                          : "bg-blue-500"
+                      }
+                        }`}
                     >
                       {board && displayCell(board[rowIndex * 3 + colIndex])}
                     </td>
@@ -255,7 +273,11 @@ export default function TicTacToeExercice() {
                   <p className="text-xs tracking-wide">GAME FINISHED</p>
                   <p data-selector="text.winner" className="font-semibold">
                     {" "}
-                    {winner === 1 ? "You won !" : "Computer has won"}
+                    {winner === 1
+                      ? "You won !"
+                      : winner === 2
+                      ? "Computer has won"
+                      : "Nobody won, so boring !"}
                   </p>
                 </>
               )}
