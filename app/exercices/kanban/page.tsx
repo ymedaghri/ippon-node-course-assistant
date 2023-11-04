@@ -1,31 +1,15 @@
 "use client"
 
-import { AlertDialogHeader } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Select,
@@ -34,146 +18,149 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import CreateTicketDialog from "./createTicketDialog"
+import DeleteTicketDialog from "./deleteTicketDialog"
+import CreateProjectDialog from "./createProjectDialog"
+import {
+  Category,
+  CategoryType,
+  Project,
+  ProjectApi,
+  Status,
+  StatusType,
+  backendUrl,
+  getRequest,
+} from "./constants"
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
+import DeleteProjectDialog from "./deleteProjectDialog"
 
-const allProjects: {
-  name: string
-  todo: string[]
-  doing: string[]
-  done: string[]
-}[] = [
-  {
-    name: "TicTacToe",
-    todo: ["bg-blue-500"],
-    doing: [],
-    done: ["bg-blue-500", "bg-green-500", "bg-blue-500"],
-  },
-  {
-    name: "Paradise",
-    todo: [],
-    doing: ["bg-green-500"],
-    done: ["bg-green-500", "bg-green-500"],
-  },
-  {
-    name: "Atmosphere",
-    todo: ["bg-yellow-500"],
-    doing: [],
-    done: ["bg-blue-500"],
-  },
-]
 export default function Kanban() {
-  const [projects, setProjects] = useState<string[]>(
-    allProjects.map((p) => p.name),
-  )
-  const inputNameRef = useRef<HTMLInputElement | null>(null)
-  const [selectedProject, setSelectedProject] = useState<{
-    name: string
-    todo: string[]
-    doing: string[]
-    done: string[]
-  }>()
+  const [projects, setProjects] = useState<Project[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project>()
 
-  const getRandomColor = () => {
-    const randomNumber = Math.round(Math.random() * 2)
-    switch (randomNumber) {
-      case 0:
-        return "bg-green-500"
-      case 1:
-        return "bg-yellow-500"
-      case 2:
+  useEffect(() => {
+    getRequest(`${backendUrl}/kanban-projects`)
+      .then((allProjects) => {
+        setProjects([
+          ...allProjects.map((project: ProjectApi) => {
+            return {
+              ...project,
+              TODO: getTicketsAtStatus(project, Status.TODO),
+              DOING: getTicketsAtStatus(project, Status.DOING),
+              DONE: getTicketsAtStatus(project, Status.DONE),
+            }
+          }),
+        ])
+      })
+      .catch((error) =>
+        setError(
+          `Erreur lors de la communication avec ${backendUrl}/kanban-projects en mode GET. ${error.message}`,
+        ),
+      )
+  }, [])
+
+  const getTicketsAtStatus = (project: ProjectApi, status: StatusType) => {
+    return project.tickets
+      .filter((ticket) => ticket.status === status)
+      .map((ticket) => ({
+        ...ticket,
+        color: getTicketColor(ticket.category),
+      }))
+  }
+
+  const getTicketColor = (category: CategoryType) => {
+    switch (category) {
+      case Category.ETUDE_FONDS_MARINS:
         return "bg-blue-500"
+      case Category.BIOLOGIE_MARINE:
+        return "bg-yellow-500"
+      case Category.CONSERVATION_MARINE:
+        return "bg-green-500"
       default:
-        return "bg-black"
+        return "bg-gray-500"
     }
   }
 
-  const handleAddProjectOnClick = () => {
-    if (inputNameRef.current) {
-      const newProject = {
-        name: inputNameRef.current.value,
-        todo: [],
-        doing: [],
-        done: [],
-      }
-      allProjects.push(newProject)
-      setProjects([...projects, newProject.name])
-      setSelectedProject(newProject)
+  const getHoverColor = (category: CategoryType) => {
+    switch (category) {
+      case Category.ETUDE_FONDS_MARINS:
+        return "hover:fill-blue-300"
+      case Category.BIOLOGIE_MARINE:
+        return "hover:fill-yellow-300"
+      case Category.CONSERVATION_MARINE:
+        return "hover:fill-green-300"
+      default:
+        return "hover:fill-gray-300"
     }
   }
 
   const handleProjectChange = (value: string) => {
-    const project = allProjects.find((project) => project.name === value)!
-    setSelectedProject(project)
-  }
-
-  const handleAddTodoOnClick = () => {
-    if (selectedProject) {
-      const project = allProjects.find(
-        (project) => project.name === selectedProject.name,
-      )!
-      project.todo = [...selectedProject.todo, getRandomColor()]
+    const project = projects.find((project) => project.id === value)
+    if (project) {
       setSelectedProject({ ...project })
     }
   }
 
-  const handleAddDoingOnClick = () => {
-    if (selectedProject) {
-      const project = allProjects.find(
-        (project) => project.name === selectedProject.name,
-      )!
-      project.doing = [...selectedProject.doing, getRandomColor()]
-      setSelectedProject({ ...project })
-    }
-  }
+  function handleOnDragEnd(result: any) {
+    if (result.destination && selectedProject) {
+      const destinationStatus = result.destination.droppableId as
+        | "TODO"
+        | "DOING"
+        | "DONE"
+      const origineStatus = result.source.droppableId as
+        | "TODO"
+        | "DOING"
+        | "DONE"
+      const index = result.source.index
 
-  const handleAddDoneOnClick = () => {
-    if (selectedProject) {
-      const project = allProjects.find(
-        (project) => project.name === selectedProject.name,
-      )!
-      project.done = [...selectedProject.done, getRandomColor()]
-      setSelectedProject({ ...project })
+      const draggedTicket = selectedProject[origineStatus][index]
+
+      selectedProject[origineStatus] = [
+        ...selectedProject[origineStatus].filter(
+          (ticket) => ticket.id != draggedTicket.id,
+        ),
+      ]
+
+      draggedTicket.status = destinationStatus
+      selectedProject[destinationStatus].push(draggedTicket)
+
+      setSelectedProject({ ...selectedProject })
+      setProjects([
+        ...projects.filter((project) => project.id != selectedProject.id),
+        selectedProject,
+      ])
     }
   }
 
   return (
     <main className="text-gray-900  antialiased">
+      {error && (
+        <AlertDialog open={error !== null}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Erreur !</AlertDialogTitle>
+              <AlertDialogDescription className="w-96 break-words">
+                {error}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setError(null)}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
       <div className="flex justify-center gap-1 px-10 pt-4">
-        <Dialog>
-          <DialogTrigger asChild className="focus:ring-3 focus:border-none">
-            <Button variant="outline">Nouveau projet</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Nouveau projet</DialogTitle>
-              <DialogDescription>
-                Entrez les informations puis cliquer sur Save.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Nom
-                </Label>
-                <Input
-                  ref={inputNameRef}
-                  id="name"
-                  defaultValue="Antares XV"
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <DialogClose asChild>
-              <Button type="button" onClick={handleAddProjectOnClick}>
-                Save and Close
-              </Button>
-            </DialogClose>
-          </DialogContent>
-        </Dialog>
-        <Select
-          value={selectedProject?.name}
-          onValueChange={handleProjectChange}
-        >
+        <CreateProjectDialog
+          setProjects={setProjects}
+          projects={projects}
+          setSelectedProject={setSelectedProject}
+          setError={setError}
+        />
+        <Select value={selectedProject?.id} onValueChange={handleProjectChange}>
           <SelectTrigger className="focus:ring-3 focus:border-none">
             <SelectValue
               className="outline-none"
@@ -182,95 +169,93 @@ export default function Kanban() {
           </SelectTrigger>
           <SelectContent className="outline-none">
             {projects.map((project, index) => (
-              <SelectItem className="outline-none" value={project} key={index}>
-                {project}
+              <SelectItem
+                className="outline-none"
+                value={project.id}
+                key={index}
+              >
+                {project.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <DeleteProjectDialog
+          projects={projects}
+          setProjects={setProjects}
+          selectedProject={selectedProject}
+          setSelectedProject={setSelectedProject}
+          setError={setError}
+        />
       </div>
-      <main className="flex justify-center gap-10 px-10 pt-4">
-        <Card className="h-[630px] w-1/3 border-red-500">
-          <CardHeader className="relative flex items-center justify-center bg-red-500 text-white">
-            <CardTitle>TODO</CardTitle>
-            <span
-              className="absolute bottom-4 right-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-white bg-red-300 text-xl font-semibold text-white"
-              onClick={handleAddTodoOnClick}
-            >
-              +
-            </span>
-          </CardHeader>
-          <ScrollArea className="h-[550px] w-full">
-            <CardContent className="grid grid-cols-3 gap-2 p-3">
-              {selectedProject?.todo.map((element, index) => (
-                <div
-                  className="col-span-1 flex items-center justify-center"
-                  key={index}
-                >
-                  <div
-                    className={`h-32 w-32 ${element} flex items-center justify-center rounded-lg text-xl text-white`}
+      <main className="grid grid-cols-1 gap-10 px-10 py-4 md:grid-cols-3">
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          {Object.keys(Status).map((status: StatusType, index) => (
+            <Card className="h-[630px]" key={index}>
+              <CardHeader className="relative flex items-center justify-center bg-red-500 text-white">
+                <CardTitle>{status}</CardTitle>
+                {selectedProject && (
+                  <span className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center ">
+                    <CreateTicketDialog
+                      status={status}
+                      selectedProject={selectedProject}
+                      getTicketColor={getTicketColor}
+                      setError={setError}
+                      setSelectedProject={setSelectedProject}
+                    />
+                  </span>
+                )}
+              </CardHeader>
+              <Droppable droppableId={status} key={index}>
+                {(provided) => (
+                  <CardContent
+                    className="grid h-[550px] auto-rows-max grid-cols-2 gap-x-4 overflow-auto pt-4 "
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
                   >
-                    Circle 2
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </ScrollArea>
-        </Card>
-        <Card className="h-[630px] w-1/3 border-red-500">
-          <CardHeader className="relative flex items-center justify-center bg-red-500 text-white">
-            <CardTitle>DOING</CardTitle>
-            <span
-              className="absolute bottom-4 right-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-white bg-red-300 text-xl font-semibold text-white"
-              onClick={handleAddDoingOnClick}
-            >
-              +
-            </span>
-          </CardHeader>
-          <ScrollArea className="h-[550px] w-full">
-            <CardContent className="grid grid-cols-3 gap-2 p-3">
-              {selectedProject?.doing.map((element, index) => (
-                <div
-                  className="col-span-1 flex items-center justify-center"
-                  key={index}
-                >
-                  <div
-                    className={`h-32 w-32 ${element} flex items-center justify-center rounded-lg text-xl text-white`}
-                  >
-                    Circle 2
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </ScrollArea>
-        </Card>
-        <Card className="h-[630px] w-1/3 border-red-500">
-          <CardHeader className="relative flex items-center justify-center bg-red-500 text-white">
-            <CardTitle>DONE</CardTitle>
-            <span
-              className="absolute bottom-4 right-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-white bg-red-300 text-xl font-semibold text-white"
-              onClick={handleAddDoneOnClick}
-            >
-              +
-            </span>
-          </CardHeader>
-          <ScrollArea className="h-[550px] w-full">
-            <CardContent className="grid grid-cols-3 gap-2 p-3">
-              {selectedProject?.done.map((element, index) => (
-                <div
-                  className="col-span-1 flex items-center justify-center"
-                  key={index}
-                >
-                  <div
-                    className={`h-32 w-32 ${element} flex items-center justify-center rounded-lg text-xl text-white`}
-                  >
-                    Circle 2
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </ScrollArea>
-        </Card>
+                    {selectedProject &&
+                      selectedProject[status as "TODO" | "DOING" | "DONE"].map(
+                        (ticket, index) => (
+                          <Draggable
+                            key={`draggable_ID_${status}_${index}`}
+                            draggableId={`draggable_ID_${status}_${index}`}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <Card
+                                className={`${ticket.color} mb-4 w-full`}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <CardHeader>
+                                  <div className="flex w-full justify-between">
+                                    <CardTitle className="w-2/3 truncate text-lg">
+                                      {ticket.code}
+                                    </CardTitle>
+                                    <DeleteTicketDialog
+                                      getHoverColor={getHoverColor}
+                                      selectedProject={selectedProject}
+                                      ticket={ticket}
+                                      setError={setError}
+                                      setSelectedProject={setSelectedProject}
+                                    />
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="truncate text-sm">
+                                  {ticket.description}
+                                </CardContent>
+                              </Card>
+                            )}
+                          </Draggable>
+                        ),
+                      )}
+                    {provided.placeholder}
+                  </CardContent>
+                )}
+              </Droppable>
+            </Card>
+          ))}
+        </DragDropContext>
       </main>
     </main>
   )

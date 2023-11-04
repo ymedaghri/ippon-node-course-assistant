@@ -33,7 +33,7 @@ export default function Header() {
   return (
     <header className="bg-white">
       <nav>
-        <div className="flex justify-start">
+        <div className="flex">
           <Image
             className="p-4"
             width="224"
@@ -45,15 +45,19 @@ export default function Header() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Link href="/" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <NavigationMenuLink
+                    className={`hidden sm:flex ${navigationMenuTriggerStyle()}`}
+                  >
                     Accueil
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Exercices</NavigationMenuTrigger>
+              <NavigationMenuItem className="flex w-full">
+                <NavigationMenuTrigger className="truncate">
+                  Exercices
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                  <ul className="grid w-full gap-3 p-4 sm:w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                     {components.map((component) => (
                       <ListItem
                         key={component.title}
