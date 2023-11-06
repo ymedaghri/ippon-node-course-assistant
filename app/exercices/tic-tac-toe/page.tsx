@@ -117,7 +117,7 @@ export default function TicTacToeExercice() {
         <AlertDialog open={error !== null}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Erreur !</AlertDialogTitle>
+              <AlertDialogTitle>{"Erreur ! On dirait que tu n'as pas terminé de coder ta partie de l'exercice 🥲 ?"}</AlertDialogTitle>
               <AlertDialogDescription>{error}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -250,13 +250,12 @@ export default function TicTacToeExercice() {
                       data-selector={`board.row(${rowIndex}).col(${colIndex})`}
                       onClick={() => markAsPlayer(rowIndex * 3 + colIndex)}
                       key={colIndex}
-                      className={`h-32 w-32 rounded-lg  p-2 text-center text-8xl text-white ${
-                        winningCells.includes(rowIndex * 3 + colIndex)
-                          ? "bg-orange-400"
-                          : invincible
+                      className={`h-32 w-32 rounded-lg  p-2 text-center text-8xl text-white ${winningCells.includes(rowIndex * 3 + colIndex)
+                        ? "bg-orange-400"
+                        : invincible
                           ? "bg-red-500"
                           : "bg-blue-500"
-                      }
+                        }
                         }`}
                     >
                       {board && displayCell(board[rowIndex * 3 + colIndex])}
@@ -276,8 +275,8 @@ export default function TicTacToeExercice() {
                     {winner === 1
                       ? "You won !"
                       : winner === 2
-                      ? "Computer has won"
-                      : "Nobody won, so boring !"}
+                        ? "Computer has won"
+                        : "Nobody won, so boring !"}
                   </p>
                 </>
               )}
