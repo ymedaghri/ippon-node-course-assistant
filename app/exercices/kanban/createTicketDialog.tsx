@@ -37,7 +37,7 @@ export default function CreateTicketDialog({
 }: {
   status: string
   selectedProject: Project
-  setSelectedProject: Dispatch<SetStateAction<Project | undefined>>
+  setSelectedProject: Dispatch<SetStateAction<Project | null>>
   setError: Dispatch<SetStateAction<string | null>>
   getTicketColor: (category: CategoryType) => string
 }) {
@@ -61,7 +61,6 @@ export default function CreateTicketDialog({
           code: code,
           description: description,
           status,
-          projectId: selectedProject.id,
         },
       )
         .then((createdTicket) => {

@@ -30,7 +30,7 @@ export default function DeleteTicketDialog({
   getHoverColor: (category: CategoryType) => string
   selectedProject: Project
   ticket: Ticket
-  setSelectedProject: Dispatch<SetStateAction<Project | undefined>>
+  setSelectedProject: Dispatch<SetStateAction<Project | null>>
   setError: Dispatch<SetStateAction<string | null>>
 }) {
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
@@ -42,7 +42,7 @@ export default function DeleteTicketDialog({
     deleteRequest(
       `${backendUrl}/kanban-projects/${selectedProject.id}/tickets/${ticket.id}`,
     )
-      .then((deletedTicket) => {
+      .then((_deletedTicket) => {
         selectedProject[ticket.status as "TODO" | "DOING" | "DONE"] =
           selectedProject[ticket.status as "TODO" | "DOING" | "DONE"].filter(
             (t) => t.id != ticket.id,

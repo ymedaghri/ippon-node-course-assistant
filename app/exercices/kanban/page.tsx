@@ -10,7 +10,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Select,
   SelectContent,
@@ -38,7 +37,7 @@ import DeleteProjectDialog from "./deleteProjectDialog"
 export default function Kanban() {
   const [projects, setProjects] = useState<Project[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [selectedProject, setSelectedProject] = useState<Project>()
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   useEffect(() => {
     getRequest(`${backendUrl}/kanban-projects`)
@@ -140,7 +139,11 @@ export default function Kanban() {
         <AlertDialog open={error !== null}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{"Oups ! On dirait que tu n'as pas terminé de coder ta partie de l'exercice 🥲 ?"}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {
+                  "Oups ! On dirait que tu n'as pas terminé de coder ta partie de l'exercice 🥲 ?"
+                }
+              </AlertDialogTitle>
               <AlertDialogDescription className="w-96 break-words">
                 {error}
               </AlertDialogDescription>
@@ -179,13 +182,15 @@ export default function Kanban() {
             ))}
           </SelectContent>
         </Select>
-        <DeleteProjectDialog
-          projects={projects}
-          setProjects={setProjects}
-          selectedProject={selectedProject}
-          setSelectedProject={setSelectedProject}
-          setError={setError}
-        />
+        {selectedProject && (
+          <DeleteProjectDialog
+            projects={projects}
+            setProjects={setProjects}
+            selectedProject={selectedProject}
+            setSelectedProject={setSelectedProject}
+            setError={setError}
+          />
+        )}
       </div>
       <main className="grid grid-cols-1 gap-10 px-10 py-4 md:grid-cols-3">
         <DragDropContext onDragEnd={handleOnDragEnd}>

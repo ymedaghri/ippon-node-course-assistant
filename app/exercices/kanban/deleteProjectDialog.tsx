@@ -24,7 +24,7 @@ export default function DeleteProjectDialog({
   projects: Project[]
   setProjects: Dispatch<SetStateAction<Project[]>>
   selectedProject: Project | undefined
-  setSelectedProject: Dispatch<SetStateAction<Project | undefined>>
+  setSelectedProject: Dispatch<SetStateAction<Project | null>>
   setError: Dispatch<SetStateAction<string | null>>
 }) {
   const [dialogOpened, setDialogOpened] = useState<boolean>(false)
@@ -36,10 +36,16 @@ export default function DeleteProjectDialog({
 
       deleteRequest(`${backendUrl}/kanban-projects/${selectedProject.id}`)
         .then((deletedProject) => {
-          setProjects([
-            ...projects.filter((project) => project.id !== selectedProject.id),
-          ])
-          setSelectedProject(projects[0])
+          const projectsUpdated = projects.filter(
+            (project) => project.id !== deletedProject[1].id,
+          )
+          setProjects([...projectsUpdated])
+
+          if (projectsUpdated.length) {
+            setSelectedProject(projectsUpdated[0])
+          } else {
+            setSelectedProject(null)
+          }
         })
         .catch((error) =>
           setError(

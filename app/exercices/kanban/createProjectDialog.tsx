@@ -21,7 +21,7 @@ export default function CreateProjectDialog({
   setError,
 }: {
   projects: Project[]
-  setSelectedProject: Dispatch<SetStateAction<Project | undefined>>
+  setSelectedProject: Dispatch<SetStateAction<Project | null>>
   setProjects: Dispatch<SetStateAction<Project[]>>
   setError: Dispatch<SetStateAction<string | null>>
 }) {
