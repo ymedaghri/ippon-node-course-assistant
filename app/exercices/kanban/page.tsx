@@ -140,7 +140,7 @@ export default function Kanban() {
         <AlertDialog open={error !== null}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{"Erreur ! On dirait que tu n'as pas terminé de coder ta partie de l'exercice 🥲 ?"}</AlertDialogTitle>
+              <AlertDialogTitle>{"Oups ! On dirait que tu n'as pas terminé de coder ta partie de l'exercice 🥲 ?"}</AlertDialogTitle>
               <AlertDialogDescription className="w-96 break-words">
                 {error}
               </AlertDialogDescription>
